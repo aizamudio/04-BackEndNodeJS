@@ -1,0 +1,102 @@
+### Obtener todos los libros sin token
+POST http://127.0.0.1:4000/graphql HTTP/1.1
+X-Request-Type: GraphQL
+Content-Type: application/json
+
+query {
+  getAllBooks {
+    asin
+    title
+  }
+}
+
+### Obtener todos los libros con token para liazamudio@gmail.com
+POST http://127.0.0.1:4000/graphql HTTP/1.1
+X-Request-Type: GraphQL
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmdWxsTmFtZSI6IkFsZXhhbmRybyBJdsOhbiBaYW11ZGlvIFJvbWVybyIsImVtYWlsIjoibGlhemFtdWRpb0BnbWFpbC5jb20iLCJpc0FkbWluIjp0cnVlLCJpYXQiOjE2NjY0NTI5MzgsImV4cCI6MTY2NjQ1MzExOH0.k2aJ497XybQwxgu_UdHTnBJZAOA35fuMMaga_cgLXN
+
+query {
+  getAllBooks {
+    asin
+    title
+  }
+}
+
+### Obtener un solo libro sin token
+POST http://127.0.0.1:4000/graphql HTTP/1.1
+X-Request-Type: GraphQL
+Content-Type: application/json
+
+query {
+  getBook(asin: "B00ICN066A") {
+    asin
+    title
+  }
+}
+
+### Obtener un solo libro con token para liazamudio@gmail.com
+POST http://127.0.0.1:4000/graphql HTTP/1.1
+X-Request-Type: GraphQL
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmdWxsTmFtZSI6IkFsZXhhbmRybyBJdsOhbiBaYW11ZGlvIFJvbWVybyIsImVtYWlsIjoibGlhemFtdWRpb0BnbWFpbC5jb20iLCJpc0FkbWluIjp0cnVlLCJpYXQiOjE2NjY0NTI5MzgsImV4cCI6MTY2NjQ1MzExOH0.k2aJ497XybQwxgu_UdHTnBJZAOA35fuMMaga_cgLXN
+
+query {
+  getBook(asin: "B00ICN066A") {
+    asin
+    title
+  }
+}
+
+
+### Obtener todos los portafolios sin token
+POST http://127.0.0.1:4000/graphql HTTP/1.1
+X-Request-Type: GraphQL
+Content-Type: application/json
+
+query getAllPortfolioFT {
+  getAllPortfolioFT {
+    idPortfolio
+    rfcUser
+  }
+}
+
+### Obtener todos los portafolios con token para liazamudio@gmail.com
+POST http://127.0.0.1:4000/graphql HTTP/1.1
+X-Request-Type: GraphQL
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmdWxsTmFtZSI6IkFsZXhhbmRybyBJdsOhbiBaYW11ZGlvIFJvbWVybyIsImVtYWlsIjoibGlhemFtdWRpb0BnbWFpbC5jb20iLCJpc0FkbWluIjp0cnVlLCJpYXQiOjE2NjY0NTI5MzgsImV4cCI6MTY2NjQ1MzExOH0.k2aJ497XybQwxgu_UdHTnBJZAOA35fuMMaga_cgLXN
+
+query getAllPortfolioFT {
+  getAllPortfolioFT {
+    idPortfolio
+    rfcUser
+  }
+}
+
+### Obtener un solo portafolio sin token
+POST http://127.0.0.1:4000/graphql HTTP/1.1
+X-Request-Type: GraphQL
+Content-Type: application/json
+
+query getPortfolioFT ($idPortfolio: ID!) {
+  getPortfolioFT(idPortfolio: "ZARA781005JK7-01") {
+    idPortfolio
+    rfcUser
+    descriptionPFT
+  }
+}
+
+### Obtener un solo portafolio con token para liazamudio@gmail.com
+POST http://127.0.0.1:4000/graphql HTTP/1.1
+X-Request-Type: GraphQL
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmdWxsTmFtZSI6IkFsZXhhbmRybyBJdsOhbiBaYW11ZGlvIFJvbWVybyIsImVtYWlsIjoibGlhemFtdWRpb0BnbWFpbC5jb20iLCJpc0FkbWluIjp0cnVlLCJpYXQiOjE2NjY0NTI5MzgsImV4cCI6MTY2NjQ1MzExOH0.k2aJ497XybQwxgu_UdHTnBJZAOA35fuMMaga_cgLXN
+
+query getPortfolioFT ($idPortfolio: ID!) {
+  getPortfolioFT(idPortfolio: "ZARA781005JK7-01") {
+    idPortfolio
+    rfcUser
+    descriptionPFT
+  }
+}

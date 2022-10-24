@@ -1,0 +1,256 @@
+import { ApolloError, AuthenticationError } from "apollo-server-errors"
+import { sequelize } from "./db"
+import { compare, hash } from 'bcrypt'
+import { sign } from 'jsonwebtoken'
+import { logger } from "./logger"
+import { verifyToken } from "./auth"
+
+const SALT_ROUNDS = 10
+
+export const resolvers = {
+    Query: {
+        getAllBooks: async (_, __, { token }) => verifyToken(token) && await sequelize.models.Book.findAll(),
+
+        getAllUserFT: async (_, __, { token }) => verifyToken(token) && await sequelize.models.UserFT.findAll(),
+        getAllPortfolioFT: async (_, __, { token }) => verifyToken(token) && await sequelize.models.PortfolioFT.findAll(),
+        getAllEmisoraFT: async (_, __, { token }) => verifyToken(token) && await sequelize.models.EmisoraFT.findAll(),
+        getAllTickerFT: async (_, __, { token }) => verifyToken(token) && await sequelize.models.TickerFT.findAll(),
+        getAllPortTickerFT: async (_, __, { token }) => verifyToken(token) && await sequelize.models.PortTickerFT.findAll(),
+
+        getBook: async (_, { asin }, { token }) => {
+            // verificación de token
+            verifyToken(token)
+            // consulta de books
+            const book = await sequelize.models.Book.findOne({
+                where: { asin } // Es una notación corta de where: { asin: asin }
+            })
+            console.log(book);
+            return book
+        },
+
+        getUserFT: async (_, { RFC }, { token }) => {
+            // verificación de token
+            verifyToken(token)
+            // consulta de UserFT
+            const userFT = await sequelize.models.UserFT.findOne({
+                where: { RFC } // Es una notación corta de where: { RFC: RFC }
+            })
+            console.log(userFT);
+            return userFT
+        },
+        getPortfolioFT: async (_, { idPortfolio }, { token }) => {
+            // verificación de token
+            verifyToken(token)
+            // consulta de portfolios
+            const portfolioFT = await sequelize.models.PortfolioFT.findOne({
+                where: { idPortfolio } // Es una notación corta de where: { idPortfolio: idPortfolio }
+            })
+            console.log(portfolioFT);
+            return portfolioFT
+        },
+        getEmisoraFT: async (_, { keyEmisora }, { token }) => {
+            // verificación de token
+            verifyToken(token)
+            // consulta de emisoras
+            const emisoraFT = await sequelize.models.EmisoraFT.findOne({
+                where: { keyEmisora } // Es una notación corta de where: { keyEmisora: keyEmisora }
+            })
+            console.log(emisoraFT);
+            return emisoraFT
+        },
+        getTickerFT: async (_, { keyTicker }, { token }) => {
+            // verificación de token
+            verifyToken(token)
+            // consulta de tickers
+            const tickerFT = await sequelize.models.TickerFT.findOne({
+                where: { keyTicker } // Es una notación corta de where: { keyTicker: keyTicker }
+            })
+            console.log(tickerFT);
+            return tickerFT
+        },
+        getPortTickerFT: async (_, { idPortfolio }, { token }) => {
+            // verificación de token
+            verifyToken(token)
+            // consulta de relación portfolios-tickers
+            const portTickerFT = await sequelize.models.PortTickerFT.findOne({
+                where: { idPortfolio } // Es una notación corta de where: { idPortfolio: idPortfolio }
+            })
+            console.log(portTickerFT);
+            return portTickerFT
+        },
+
+    },
+    Mutation: {
+        insertBook: async (_, { asin, title, author, pages }, { token }) => {
+            return verifyToken(token) && await sequelize.models.Book.create({ asin, title, author, pages })
+        },
+
+        insertUserFT: async (_, { RFC, firstName, lastName, email, addressHome }, { token }) => {
+            return verifyToken(token) && await sequelize.models.UserFT.create({ RFC, firstName, lastName, email, addressHome })
+        },
+        insertPortfolioFT: async (_, { idPortfolio, rfcUser, descriptionPFT }, { token }) => {
+            return verifyToken(token) && await sequelize.models.PortfolioFT.create({ idPortfolio, rfcUser, descriptionPFT })
+        },
+        insertEmisoraFT: async (_, { keyEmisora, nameEmisora, stockExchage }, { token }) => {
+            return verifyToken(token) && await sequelize.models.EmisoraFT.create({ keyEmisora, nameEmisora, stockExchage })
+        },
+        insertTickerFT: async (_, { keyTicker, nameTicker, keyEmisora }, { token }) => {
+            return verifyToken(token) && await sequelize.models.TickerFT.create({ keyTicker, nameTicker, keyEmisora })
+        },
+        insertPortTickerFT: async (_, { idPortfolio,  keyTicker }, { token }) => {
+            return verifyToken(token) && await sequelize.models.PortTickerFT.create({ idPortfolio,  keyTicker })
+        },
+
+        updateBook: async (_, { asin, title, author, pages }, { token }) => {
+            // verificación de token
+            verifyToken(token)
+            // actualización de libro
+            const book = await sequelize.models.Book.findOne({
+                where: { asin } // Es una notación corta de where: { asin: asin }
+            })
+            // Si existe, actualizamos
+            if (book) {
+                await sequelize.models.Book.update({ asin, title, author, pages }, {
+                    where: { asin } // es una notación corta de where: { asin: asin }
+                })
+                // Retornaamos el libro actualizado
+                return await sequelize.models.Book.findOne({ where: { asin } })
+            }
+            // En caso contrario, desplegamos el error
+            else {
+                throw new ApolloError('Book not found', 'ERR003')
+            }
+        },
+
+        updateUserFT: async (_, { RFC, firstName, lastName, email, addressHome }, { token }) => {
+            // verificación de token
+            verifyToken(token)
+            // actualización de libro
+            const userFT = await sequelize.models.UserFT.findOne({
+                where: { RFC } // Es una notación corta de where: { RFC: RFC }
+            })
+            // Si existe, actualizamos
+            if (userFT) {
+                await sequelize.models.UserFT.update({ RFC, firstName, lastName, email, addressHome }, {
+                    where: { RFC } // es una notación corta de where: { RFC: RFC }
+                })
+                // Retornaamos el usuario actualizado
+                return await sequelize.models.UserFT.findOne({ where: { RFC } })
+            }
+            // En caso contrario, desplegamos el error
+            else {
+                throw new ApolloError('User not found', 'ERR003')
+            }
+        },
+
+        updatePortfolioFT: async (_, { idPortfolio, rfcUser, descriptionPFT }, { token }) => {
+            // verificación de token
+            verifyToken(token)
+            // actualización de libro
+            const portfolioFT = await sequelize.models.PortfolioFT.findOne({
+                where: { idPortfolio } // Es una notación corta de where: { idPortfolio: idPortfolio }
+            })
+            // Si existe, actualizamos
+            if (portfolioFT) {
+                await sequelize.models.PortfolioFT.update({ idPortfolio, rfcUser, descriptionPFT }, {
+                    where: { idPortfolio } // es una notación corta de where: { idPortfolio: idPortfolio }
+                })
+                // Retornaamos el portafolio actualizado
+                return await sequelize.models.PortfolioFT.findOne({ where: { idPortfolio } })
+            }
+            // En caso contrario, desplegamos el error
+            else {
+                throw new ApolloError('Portfolio not found', 'ERR003')
+            }
+        },
+
+        updateEmisoraFT: async (_, { keyEmisora, nameEmisora, stockExchage }, { token }) => {
+            // verificación de token
+            verifyToken(token)
+            // actualización de libro
+            const emisoraFT = await sequelize.models.EmisoraFT.findOne({
+                where: { keyEmisora } // Es una notación corta de where: { keyEmisora: keyEmisora }
+            })
+            // Si existe, actualizamos
+            if (emisoraFT) {
+                await sequelize.models.EmisoraFT.update({ keyEmisora, nameEmisora, stockExchage }, {
+                    where: { keyEmisora } // es una notación corta de where: { keyEmisora: keyEmisora }
+                })
+                // Retornaamos la emisora actualizada
+                return await sequelize.models.EmisoraFT.findOne({ where: { keyEmisora } })
+            }
+            // En caso contrario, desplegamos el error
+            else {
+                throw new ApolloError('Emisora not found', 'ERR003')
+            }
+        },
+
+        updateTickerFT: async (_, { keyTicker, nameTicker, keyEmisora }, { token }) => {
+            // verificación de token
+            verifyToken(token)
+            // actualización de libro
+            const tickerFT = await sequelize.models.TickerFT.findOne({
+                where: { keyTicker } // Es una notación corta de where: { keyTicker: keyTicker }
+            })
+            // Si existe, actualizamos
+            if (tickerFT) {
+                await sequelize.models.TickerFT.update({ keyTicker, nameTicker, keyEmisora }, {
+                    where: { keyTicker } // es una notación corta de where: { keyTicker: keyTicker }
+                })
+                // Retornamos el ticker actualizado
+                return await sequelize.models.TickerFT.findOne({ where: { keyTicker } })
+            }
+            // En caso contrario, desplegamos el error
+            else {
+                throw new ApolloError('Ticker not found', 'ERR003')
+            }
+        },
+
+        updatePortTickerFT: async (_, { idPortfolio,  keyTicker }, { token }) => {
+            // verificación de token
+            verifyToken(token)
+            // actualización de libro
+            const portTickerFT = await sequelize.models.PortTickerFT.findOne({
+                where: { idPortfolio } // Es una notación corta de where: { idPortfolio: idPortfolio }
+            })
+            // Si existe, actualizamos
+            if (portTickerFT) {
+                await sequelize.models.PortTickerFT.update({ idPortfolio,  keyTicker }, {
+                    where: { idPortfolio } // es una notación corta de where: { idPortfolio: idPortfolio }
+                })
+                // Retornamos el vinculo portafolio-ticker
+                return await sequelize.models.PortTickerFT.findOne({ where: { idPortfolio } })
+            }
+            // En caso contrario, desplegamos el error
+            else {
+                throw new ApolloError('Vinculo portafolio-ticker not found', 'ERR003')
+            }
+        },
+
+        // Agregamos signUp para crear y validad usuarios
+        signUp: async (_, { input: user }) => {
+            user.password = await hash(user.password, SALT_ROUNDS)
+            return await sequelize.models.User.create({ ...user })
+        },
+        
+        signIn: async (_, { email, password }) => {
+            // buscamos al usuario en la BD
+            const user = await sequelize.models.User.findOne({ where: { email } })
+            // verificamos que el usuario no sea nulo y que el password 
+            if (user && await compare(password, user.password)) {
+                // generamos los datos para el payload del JWT
+                const tokenData = {
+                    fullName: user.name + ' ' + user.lastname,
+                    email,
+                    isAdmin: user.isAdmin
+                }
+                logger.info(`[signIn] El usuario ${user.id} a accedido al sistema`)
+                // Generamos el JWT y lo regresamos
+                return sign(tokenData, process.env.JWT_SECRET, { expiresIn: 180 }) // expira en 3'
+            } else {
+                logger.error(`[signIn] Credenciales inválidas para ${email}`) // por seguridad no loggeamos el password
+                throw new AuthenticationError('Invalid credentials')
+            }
+        }
+    }
+}
